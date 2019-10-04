@@ -1,6 +1,5 @@
 import algo.*;
-import problem.OneMax;
-import problem.Problem;
+import problem.ProblemsManager;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -18,34 +17,40 @@ public class Main {
         double lowerBoundAbSq = 1.0 / (n * n);
 
         System.out.println("two rate");
-        runAlgo("tworate.csv", lowerBoundTwoRate, getTwoRateImplementation());
+        runAlgo("tworate.csv", lowerBoundTwoRate, getTwoRateImplementation(), ProblemsManager.ProblemType.ONE_MAX);
         System.out.println("two rate sq");
-        runAlgo("tworatesq.csv", lowerBoundTwoRateSq, getTwoRateImplementation());
+        runAlgo("tworatesq.csv", lowerBoundTwoRateSq, getTwoRateImplementation(), ProblemsManager.ProblemType.ONE_MAX);
 
 
 //        System.out.println("two rate adaptive");
-//        runAlgo("adtworate.csv", lowerBoundTwoRate, getAdaptiveTwoRateImplementation());
+//        runAlgo("adtworate.csv", lowerBoundTwoRate, getAdaptiveTwoRateImplementation(),
+//                ProblemsManager.ProblemType.ONE_MAX);
 //        System.out.println("two rate sq adaptive");
-//        runAlgo("adtworatesq.csv", lowerBoundTwoRateSq, getAdaptiveTwoRateImplementation());
+//        runAlgo("adtworatesq.csv", lowerBoundTwoRateSq, getAdaptiveTwoRateImplementation(),
+//                ProblemsManager.ProblemType.ONE_MAX);
 //
 //        System.out.println("two rate");
-//        runAlgoOnPoint("tworate1600.csv", lowerBoundTwoRate, getTwoRateImplementation(), 1600);
+//        runAlgoOnPoint("tworate1600.csv", lowerBoundTwoRate, getTwoRateImplementation(), 1600,
+//                ProblemsManager.ProblemType.ONE_MAX);
 //        System.out.println("two rate sq");
-//        runAlgoOnPoint("tworatesq1600.csv", lowerBoundTwoRateSq, getTwoRateImplementation(), 1600);
+//        runAlgoOnPoint("tworatesq1600.csv", lowerBoundTwoRateSq, getTwoRateImplementation(), 1600,
+//                ProblemsManager.ProblemType.ONE_MAX);
 //
 //        System.out.println("two rate ad");
-//        runAlgoOnPoint("adtworate1600.csv", lowerBoundTwoRate, getAdaptiveTwoRateImplementation(), 1600);
+//        runAlgoOnPoint("adtworate1600.csv", lowerBoundTwoRate, getAdaptiveTwoRateImplementation(), 1600,
+//                ProblemsManager.ProblemType.ONE_MAX);
 //        System.out.println("two rate ad sq");
-//        runAlgoOnPoint("adtworatesq1600.csv", lowerBoundTwoRateSq, getAdaptiveTwoRateImplementation(), 1600);
-
+//        runAlgoOnPoint("adtworatesq1600.csv", lowerBoundTwoRateSq, getAdaptiveTwoRateImplementation(), 1600,
+//                ProblemsManager.ProblemType.ONE_MAX);
+//
 //        System.out.println("AB algorithm");
-//        runAlgo("ab.csv", lowerBoundAb, getABImplementation());
+//        runAlgo("ab.csv", lowerBoundAb, getABImplementation(), ProblemsManager.ProblemType.ONE_MAX);
 //        System.out.println("AB algorithm sq");
-//        runAlgo("absq.csv", lowerBoundAbSq, getABImplementation());
+//        runAlgo("absq.csv", lowerBoundAbSq, getABImplementation(), ProblemsManager.ProblemType.ONE_MAX);
 
     }
 
-    private static void runAlgo(String filename, double lowerBound, AlgoFactory factory) throws FileNotFoundException {
+    private static void runAlgo(String filename, double lowerBound, AlgoFactory factory, ProblemsManager.ProblemType type) throws FileNotFoundException {
         PrintWriter pw = new PrintWriter(filename);
         pw.println("gen, lambda");
         for (int lambda : lambdas) {
@@ -53,7 +58,7 @@ public class Main {
             double averageIterCount = 0;
             for (int i = 0; i < avCount; i++) {
                 int curIterCount = 0;
-                Algorithm algo = factory.getInstance(lambda, lowerBound, n);
+                Algorithm algo = factory.getInstance(lambda, lowerBound, type, n);
                 while (!algo.isFinished()) {
                     algo.makeIteration();
                     curIterCount++;
@@ -66,40 +71,46 @@ public class Main {
         pw.close();
     }
 
-    private static void runAlgoOnPoint(String filename, double lowerBound, AlgoFactory factory, int lambda) throws FileNotFoundException {
+    private static void runAlgoOnPoint(String filename, double lowerBound, AlgoFactory factory, int lambda, ProblemsManager.ProblemType type) throws FileNotFoundException {
         PrintWriter pw = new PrintWriter(filename);
         pw.println("fitness, mutation, iter");
         int curIterCount = 0;
-        Algorithm algo = factory.getInstance(lambda, lowerBound, n);
+        Algorithm algo = factory.getInstance(lambda, lowerBound, type, n);
         while (!algo.isFinished()) {
             algo.makeIteration();
             curIterCount++;
-            pw.println(algo.getFitness() + ", " + algo.getMutationRate()  + ", " + curIterCount);
+            pw.println(algo.getFitness() + ", " + algo.getMutationRate() + ", " + curIterCount);
         }
         pw.close();
     }
 
     private static AlgoFactory getTwoRateImplementation() {
-        return (lambda, lowerBound, problemLength) -> new TwoRate(2.0, lowerBound, lambda, new OneMax(problemLength));
+        return (lambda, lowerBound, type, problemLength) -> new TwoRate(2.0, lowerBound, lambda,
+                ProblemsManager.createProblemInstance(type, problemLength));
     }
 
     private static AlgoFactory getTwoRateSQImplementation() {
-        return (lambda, lowerBound, problemLength) -> new TwoRate(2.0 / n, lowerBound, lambda, new OneMax(problemLength));
+        return (lambda, lowerBound, type, problemLength) -> new TwoRate(2.0 / n, lowerBound, lambda,
+                ProblemsManager.createProblemInstance(type, problemLength));
     }
 
     private static AlgoFactory getAdaptiveTwoRateSQImplementation() {
-        return (lambda, lowerBound, problemLength) -> new AdaptiveTwoRate(2.0 / n, lowerBound, lambda, new OneMax(problemLength));
+        return (lambda, lowerBound, type, problemLength) -> new AdaptiveTwoRate(2.0 / n, lowerBound, lambda,
+                ProblemsManager.createProblemInstance(type, problemLength));
     }
 
     private static AlgoFactory getAdaptiveTwoRateImplementation() {
-        return (lambda, lowerBound, problemLength) -> new AdaptiveTwoRate(2.0, lowerBound, lambda, new OneMax(problemLength));
+        return (lambda, lowerBound, type, problemLength) -> new AdaptiveTwoRate(2.0, lowerBound, lambda,
+                ProblemsManager.createProblemInstance(type, problemLength));
     }
 
     private static AlgoFactory getABImplementation() {
-        return (lambda, lowerBound, problemLength) -> new ABalgo(1.0 / n, 2, 0.5, lowerBound, lambda, new OneMax(problemLength));
+        return (lambda, lowerBound, type, problemLength) -> new ABalgo(1.0 / n, 2, 0.5, lowerBound, lambda,
+                ProblemsManager.createProblemInstance(type, problemLength));
     }
 
     private static AlgoFactory getABSQImplementation() {
-        return (lambda, lowerBound, problemLength) -> new ABalgo(1.0 / (n * n), 2, 0.5, lowerBound, lambda, new OneMax(problemLength));
+        return (lambda, lowerBound, type, problemLength) -> new ABalgo(1.0 / (n * n), 2, 0.5, lowerBound, lambda,
+                ProblemsManager.createProblemInstance(type, problemLength));
     }
 }
