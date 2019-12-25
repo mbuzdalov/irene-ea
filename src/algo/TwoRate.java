@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class TwoRate implements Algorithm {
-    private double mutationRate;
+    protected double mutationRate;
     private final double lowerBound; // 2.0 / problemLength or 2.0 / (problemLength^2)
     private final int lambda;
 
@@ -38,7 +38,7 @@ public class TwoRate implements Algorithm {
         double newMutationRate = mutationRate;
         if (bpHalf.fitness > bpMult.fitness) {
             if (bpHalf.fitness >= problem.getFitness()) {
-                problem.applyPatch(bpHalf.patch, bpHalf.fitness);
+                updateProblemInstance(bpHalf);
             } else {
                 decreaseCount++;
                 decreaseCountInfo.add(problem.getFitness() + "," + mutationRate + "'" + (problem.getFitness() - bpHalf.fitness) + "," + (problem.getFitness() - bpMult.fitness));
@@ -46,7 +46,7 @@ public class TwoRate implements Algorithm {
             newMutationRate = mutationRate / 2;
         } else if (bpHalf.fitness < bpMult.fitness) {
             if (bpMult.fitness >= problem.getFitness()) {
-                problem.applyPatch(bpMult.patch, bpMult.fitness);
+                updateProblemInstance(bpMult);
             } else {
                 increaseCount++;
             }
@@ -54,14 +54,14 @@ public class TwoRate implements Algorithm {
         } else { // что если равны?
             if (rand.nextBoolean()) {
                 if (bpHalf.fitness >= problem.getFitness()) {
-                    problem.applyPatch(bpHalf.patch, bpHalf.fitness);
+                    updateProblemInstance(bpHalf);
                 } else {
                     equalCount++;
                 }
                 newMutationRate = mutationRate / 2;
             } else {
                 if (bpHalf.fitness >= problem.getFitness()) {
-                    problem.applyPatch(bpMult.patch, bpMult.fitness);
+                    updateProblemInstance(bpMult);
                 } else {
                     equalCount++;
                 }
@@ -81,6 +81,10 @@ public class TwoRate implements Algorithm {
         }
 
         mutationRate = Math.min(Math.max(lowerBound, mutationRate), 0.25);
+    }
+
+    protected void updateProblemInstance(BestCalculatedPatch bpHalf) {
+        problem.applyPatch(bpHalf.patch, bpHalf.fitness);
     }
 
     @Override
@@ -183,7 +187,7 @@ public class TwoRate implements Algorithm {
 //        return patch;
 //    }
 
-    private class BestCalculatedPatch {
+    protected class BestCalculatedPatch {
         List<Integer> patch;
         int fitness;
 
