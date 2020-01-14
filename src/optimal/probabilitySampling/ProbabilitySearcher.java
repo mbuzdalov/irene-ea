@@ -15,17 +15,6 @@ public abstract class ProbabilitySearcher {
         myLastReturnedPrecision = leftProb - precision;
     }
 
-    @NotNull
-    public static ProbabilitySearcher createProbabilitySearcher(double leftProb, double rightProb, double precision,
-                                                                ProbabilitySamplingStrategy strategy) {
-        if (strategy.equals(ProbabilitySamplingStrategy.ITERATIVE)) {
-            return new IterativeProbabilitySearcher(leftProb, rightProb, precision);
-        } else if (strategy.equals(ProbabilitySamplingStrategy.TERNARY_SEARCH)) {
-            throw new IllegalStateException("Ternary search is not implemented yet");
-        }
-        throw new IllegalArgumentException("Unknown strategy");
-    }
-
     // if feedback > 0 then previous returned probability improved something
     public abstract double getNextProb(double feedback);
 

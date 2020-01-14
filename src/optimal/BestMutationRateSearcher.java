@@ -45,8 +45,7 @@ public class BestMutationRateSearcher {
     }
 
     protected ProbabilitySearcher getProbabilitySearcher() {
-        return ProbabilitySearcher.createProbabilitySearcher(minMutationProbability, maxMutationProbability,
-                precisionForProbability, ProbabilitySamplingStrategy.ITERATIVE);
+        return ProbabilitySamplingStrategy.ITERATIVE.create(minMutationProbability, maxMutationProbability, precisionForProbability);
     }
 
     public ArrayList<Double> getBestMutationProbabilities() {
