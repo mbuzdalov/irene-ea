@@ -1,7 +1,5 @@
 package optimal.probabilitySampling;
 
-import com.sun.istack.internal.NotNull;
-
 public abstract class ProbabilitySearcher {
     protected final double myLeftProb;
     protected final double myRightProb;
